@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Content Unlocker | Watch Ads to Continue</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Fixed Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to right, #1e40af, #3b82f6);
+            padding: 18px 20px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .timer-container {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        .timer {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fbbf24;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .ads-counter {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        /* SMALL GREEN GO TO VIDEO BUTTON - Right side of header */
+        .unlock-btn-header {
+            background: linear-gradient(to right, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+            min-width: 140px;
+        }
+        
+        .unlock-btn-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .unlock-btn-header:active {
+            transform: translateY(0);
+        }
+        
+        .unlock-btn-header:disabled {
+            background: linear-gradient(to right, #475569, #64748b);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .unlock-btn-header i {
+            font-size: 1rem;
+        }
+        
+        /* Ad Content Area */
+        .content-container {
+            margin-top: 90px; /* Space for fixed header */
+            height: calc(100vh - 90px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ad-frame-container {
+            flex: 1;
+            background-color: #1e293b;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ad-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .ad-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .ad-overlay.hidden {
+            display: none;
+        }
+        
+        .overlay-icon {
+            font-size: 4rem;
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+        
+        .overlay-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #fbbf24;
+        }
+        
+        .overlay-text {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            max-width: 500px;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+        
+        .loading-bar {
+            width: 100%;
+            max-width: 400px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(to right, #3b82f6, #60a5fa);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Ad Status Indicators */
+        .ad-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 0 20px;
+        }
+        
+        .ad-indicator {
+            flex: 1;
+            max-width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background-color: #475569;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ad-indicator.active {
+            background-color: #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+        
+        .ad-indicator.completed {
+            background-color: #10b981;
+        }
+        
+        .ad-indicator-text {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        
+        .ad-indicator.active .ad-indicator-text {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .ad-indicator.completed .ad-indicator-text {
+            color: #10b981;
+        }
+        
+        /* Instructions Panel */
+        .instructions-panel {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px;
+            border-left: 4px solid #3b82f6;
+            display: none;
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            right: 20px;
+            z-index: 20;
+        }
+        
+        .instructions-panel.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .instructions-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #60a5fa;
+        }
+        
+        /* Footer - Removed unlock button from here */
+        .footer {
+            background-color: #1e293b;
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #334155;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px 20px;
+            }
+            
+            .header-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .unlock-btn-header {
+                position: absolute;
+                top: 15px;
+                right: 20px;
+                min-width: 130px;
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .header-title {
+                margin-right: 150px;
+            }
+            
+            .content-container {
+                margin-top: 120px;
+                height: calc(100vh - 120px);
+            }
+            
+            .overlay-title {
+                font-size: 1.5rem;
+            }
+            
+            .overlay-text {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .timer {
+                font-size: 1.2rem;
+            }
+            
+            .ads-counter {
+                font-size: 0.8rem;
+            }
+            
+            .unlock-btn-header {
+                min-width: 120px;
+                padding: 7px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .header-title {
+                margin-right: 130px;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Completion animation */
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        .unlock-btn-header.unlocked {
+            animation: pulseGreen 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Header with SMALL GREEN BUTTON on right -->
+    <div class="header">
+        <div class="header-title">
+            <i class="fas fa-lock"></i>
+            <h1>Link එක ලබා ගැනිම සදහා රැදි සිටින්න</h1>
+        </div>
+        
+        <div class="header-info">
+            <div class="timer-container">
+                <i class="far fa-clock"></i>
+                <span class="timer" id="timer">15</span>
+            </div>
+            
+            <div class="ads-counter">
+                Ad <span id="currentAd">1</span> of 3
+            </div>
+        </div>
+        
+        <!-- SMALL GREEN GO TO VIDEO BUTTON on right side -->
+        <button class="unlock-btn-header" id="unlockButtonHeader" disabled>
+            <i class="fas fa-lock"></i> GO TO VIDEO
+        </button>
+    </div>
+    
+    <!-- Instructions Panel (shown only at start) -->
+    <div class="instructions-panel" id="instructionsPanel">
+        <div class="instructions-title">
+            <i class="fas fa-info-circle"></i>
+            <h3> රැදි සිටින්න …… :</h3>
+        </div>
+        <p>Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න .</p>
+    </div>
+    
+    <!-- Ad Content Area -->
+    <div class="content-container">
+        <div class="ad-frame-container">
+            <!-- Overlay shown between ads -->
+            <div class="ad-overlay" id="adOverlay">
+                <div class="overlay-icon">
+                    <i class="fas fa-ad"></i>
+                </div>
+                <div class="overlay-title">කරුණාකර රැදි සිටින්න</div>
+                <div class="overlay-text" id="overlayText">Preparing ad #1 of 3. Please wait...</div>
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loadingProgress"></div>
+                </div>
+            </div>
+            
+            <!-- Iframe for loading ad URLs -->
+            <iframe class="ad-frame" id="adFrame" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+        
+        <!-- Ad Status Indicators with labels -->
+        <div class="ad-indicators">
+            <div class="ad-indicator active" id="indicator1">
+                <div class="ad-indicator-text">Ad 1</div>
+            </div>
+            <div class="ad-indicator" id="indicator2">
+                <div class="ad-indicator-text">Ad 2</div>
+            </div>
+            <div class="ad-indicator" id="indicator3">
+                <div class="ad-indicator-text">Ad 3</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>විඩියෝව නරඹිම සදහා දැන්විම් 03 ක් අවසන් වනතෙක් රැදිසිටිය යුතුය </p>
+    </div>
+
+    <script>
+        // Configuration
+        const TOTAL_ADS = 3;
+        const TIME_PER_AD = 10; // seconds
+        const ORIGINAL_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // boturls VID001 with your actual URL
+        
+        // AdsterraURLs for testing (safe, educational content)
+        const AD_URLS = [
+            "https://www.effectivegatecpm.com/i9q1y7nvv?key=ac01236d2cc3992387c55fe1f97dce50",
+            "https://www.effectivegatecpm.com/zv20wxy0?key=fc320d9845eafdf29ef8f630bff6b872",
+            "https://www.effectivegatecpm.com/tzrrbk2dri?key=b3b5c86d1cf0f8c4ebca90d9cfe0f4aa"
+        ];
+        
+        // State variables
+        let currentAd = 1;
+        let timeLeft = TIME_PER_AD;
+        let timerInterval;
+        let adsCompleted = 0;
+        let isTransitioning = false;
+        
+        // DOM Elements
+        const timerElement = document.getElementById('timer');
+        const currentAdElement = document.getElementById('currentAd');
+        const adFrame = document.getElementById('adFrame');
+        const adOverlay = document.getElementById('adOverlay');
+        const overlayText = document.getElementById('overlayText');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const unlockButtonHeader = document.getElementById('unlockButtonHeader');
+        const instructionsPanel = document.getElementById('instructionsPanel');
+        const indicators = [
+            document.getElementById('indicator1'),
+            document.getElementById('indicator2'),
+            document.getElementById('indicator3')
+        ];
+        
+        // Initialize the content locker
+        function initContentLocker() {
+            // Show instructions for 3 seconds
+            instructionsPanel.classList.add('show');
+            setTimeout(() => {
+                instructionsPanel.classList.remove('show');
+                loadAd();
+            }, 3000);
+            
+            startTimer();
+        }
+        
+        // Load the current ad into iframe
+        function loadAd() {
+            isTransitioning = true;
+            
+            // Show overlay with loading message
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = `Loading advertisement ${currentAd} of ${TOTAL_ADS}...`;
+            
+            // Reset loading progress
+            loadingProgress.style.width = '0%';
+            
+            // Load the ad after a short delay (simulate loading time)
+            setTimeout(() => {
+                // Set iframe source to Wikipedia URL
+                adFrame.src = AD_URLS[currentAd - 1];
+                
+                // Hide overlay after iframe loads
+                adFrame.onload = () => {
+                    setTimeout(() => {
+                        adOverlay.classList.add('hidden');
+                        isTransitioning = false;
+                        updateOverlayForNextAd();
+                    }, 500);
+                };
+                
+                // Update indicators
+                updateIndicators();
+                
+                // Start the timer for this ad
+                startTimer();
+            }, 1000);
+        }
+        
+        // Update overlay text for next ad
+        function updateOverlayForNextAd() {
+            if (currentAd < TOTAL_ADS) {
+                overlayText.textContent = `Advertisement ${currentAd + 1} will start in a moment...`;
+            } else {
+                overlayText.textContent = "All ads completed! Preparing your content...";
+            }
+        }
+        
+        // Start the countdown timer
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = TIME_PER_AD;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                // Update loading progress in overlay
+                const progress = ((TIME_PER_AD - timeLeft) / TIME_PER_AD) * 100;
+                loadingProgress.style.width = `${progress}%`;
+                
+                // When timer reaches zero
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    completeCurrentAd();
+                }
+            }, 1000);
+        }
+        
+        // Update the timer display
+        function updateTimerDisplay() {
+            timerElement.textContent = timeLeft.toString().padStart(2, '0');
+        }
+        
+        // Update ad indicators
+        function updateIndicators() {
+            indicators.forEach((indicator, index) => {
+                indicator.classList.remove('active', 'completed');
+                
+                if (index + 1 === currentAd) {
+                    indicator.classList.add('active');
+                } else if (index + 1 < currentAd) {
+                    indicator.classList.add('completed');
+                }
+            });
+        }
+        
+        // Mark current ad as completed and move to next
+        function completeCurrentAd() {
+            adsCompleted++;
+            
+            // Update current ad counter
+            currentAdElement.textContent = currentAd;
+            
+            // If all ads completed, enable the button
+            if (adsCompleted >= TOTAL_ADS) {
+                allAdsCompleted();
+                return;
+            }
+            
+            // Move to next ad
+            currentAd++;
+            
+            // Show overlay before loading next ad
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = `Advertisement ${currentAd} starting in 3 seconds...`;
+            
+            // Show countdown for next ad
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                overlayText.textContent = `Advertisement ${currentAd} starting in ${countdown} seconds...`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    loadAd();
+                }
+            }, 1000);
+        }
+        
+        // When all ads are completed
+        function allAdsCompleted() {
+            // Clear iframe
+            adFrame.src = "about:blank";
+            
+            // Update UI
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = "All ads completed! Click the green 'GO TO VIDEO' button to access your content.";
+            loadingProgress.style.width = "100%";
+            
+            // Update timer display
+            timerElement.textContent = "00";
+            timerElement.style.color = "#10b981";
+            
+            // Update indicators
+            indicators.forEach(indicator => {
+                indicator.classList.add('completed');
+                indicator.classList.remove('active');
+            });
+            
+            // Enable the unlock button (small green button in header)
+            unlockButtonHeader.disabled = false;
+            unlockButtonHeader.innerHTML = '<i class="fas fa-unlock"></i> GO TO VIDEO';
+            unlockButtonHeader.classList.add('unlocked');
+            
+            // Update current ad display
+            currentAdElement.textContent = "3";
+            currentAdElement.style.color = "#10b981";
+        }
+        
+        // Redirect to original URL when button is clicked
+        function redirectToOriginalUrl() {
+            // Show loading state
+            unlockButtonHeader.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+            unlockButtonHeader.disabled = true;
+            
+            // Update overlay
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = "Redirecting to your video content...";
+            
+            // Redirect after short delay
+            setTimeout(() => {
+                // For testing, we'll use a test URL (YouTube)
+                // In production, replace with your actual URL
+                const testUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                
+                // Open in new tab
+                window.open(testUrl, '_blank');
+                
+                // Alternatively, you can redirect in the same tab:
+                // window.location.href = ORIGINAL_URL;
+                
+                // Show completion message
+                overlayText.textContent = "විඩියෝ එක තියන BOT වෙත ඔබ යොමුකර ඇත කරුණාකර ක්‍රියා නොකරයි නම් ඉහත REDIRECTED බටනය ක්ලික් කරන්න";
+                
+                // Reset button after a moment
+                setTimeout(() => {
+                    unlockButtonHeader.innerHTML = '<i class="fas fa-check"></i> REDIRECTED';
+                    unlockButtonHeader.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+        
+        // Event listeners
+        unlockButtonHeader.addEventListener('click', redirectToOriginalUrl);
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initContentLocker);
+        
+        // Add a visual effect when page loads
+        window.onload = function() {
+            setTimeout(() => {
+                document.querySelector('.header').style.transform = 'translateY(0)';
+                document.querySelector('.header').style.opacity = '1';
+            }, 100);
+        };
+        
+        // Initial styles for header animation
+        document.querySelector('.header').style.transform = 'translateY(-20px)';
+        document.querySelector('.header').style.opacity = '0.8';
+        document.querySelector('.header').style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+    </script>
+</body>
+</html>
