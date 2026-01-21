@@ -20,6 +20,125 @@
             overflow-x: hidden;
         }
         
+        /* Configuration Section - Easy to Update */
+        .config-section {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 100px 20px 20px;
+            border: 2px solid #3b82f6;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            z-index: 2000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .config-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .config-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #60a5fa;
+            font-size: 1.5rem;
+        }
+        
+        .config-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input, .form-group select {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-group select option {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .config-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .config-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-config {
+            background: linear-gradient(to right, #10b981, #059669);
+            color: white;
+        }
+        
+        .close-config {
+            background: linear-gradient(to right, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .config-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .config-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(to right, #3b82f6, #1e40af);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .config-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.6);
+        }
+        
         /* Fixed Header */
         .header {
             position: fixed;
@@ -129,6 +248,7 @@
             background-color: #1e293b;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
         
         .ad-frame {
@@ -243,6 +363,28 @@
             color: #10b981;
         }
         
+        /* Auto Engagement Status */
+        .engagement-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            color: #60a5fa;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .engagement-status.hidden {
+            display: none;
+        }
+        
         /* Instructions Panel */
         .instructions-panel {
             background: rgba(30, 41, 59, 0.95);
@@ -271,7 +413,7 @@
             color: #60a5fa;
         }
         
-        /* Footer - Removed unlock button from here */
+        /* Footer */
         .footer {
             background-color: #1e293b;
             padding: 15px;
@@ -319,6 +461,19 @@
             .overlay-text {
                 font-size: 1rem;
             }
+            
+            .config-section {
+                margin: 120px 10px 10px;
+                left: 10px;
+                right: 10px;
+            }
+            
+            .engagement-status {
+                top: 5px;
+                right: 5px;
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -360,9 +515,78 @@
         .unlock-btn-header.unlocked {
             animation: pulseGreen 2s infinite;
         }
+        
+        /* Auto-click animation */
+        @keyframes autoClickPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .auto-click-active {
+            animation: autoClickPulse 2s infinite;
+        }
     </style>
 </head>
 <body>
+    <!-- Configuration Section (Hidden by default) -->
+    <div class="config-section" id="configSection">
+        <div class="config-title">
+            <i class="fas fa-cog"></i>
+            <h3>Configuration Settings</h3>
+        </div>
+        <div class="config-form" id="configForm">
+            <div class="form-group">
+                <label for="totalAds">Total Ads (1-10):</label>
+                <input type="number" id="totalAds" min="1" max="10" value="3">
+            </div>
+            <div class="form-group">
+                <label for="timePerAd">Time Per Ad (seconds):</label>
+                <input type="number" id="timePerAd" min="5" max="60" value="10">
+            </div>
+            <div class="form-group">
+                <label for="videoUrl">Video URL:</label>
+                <input type="text" id="videoUrl" value="https://t.me/Salalihiniyasl_bot?start=BQADAQADQhEAAqDtgEc3bO3u8eHNTxYE">
+            </div>
+            <div class="form-group">
+                <label for="adUrl1">Ad URL 1:</label>
+                <input type="text" id="adUrl1" value="https://www.effectivegatecpm.com/i9q1y7nvv?key=ac01236d2cc3992387c55fe1f97dce50">
+            </div>
+            <div class="form-group">
+                <label for="adUrl2">Ad URL 2:</label>
+                <input type="text" id="adUrl2" value="https://www.effectivegatecpm.com/zv20wxy0?key=fc320d9845eafdf29ef8f630bff6b872">
+            </div>
+            <div class="form-group">
+                <label for="adUrl3">Ad URL 3:</label>
+                <input type="text" id="adUrl3" value="https://www.effectivegatecpm.com/tzrrbk2dri?key=b3b5c86d1cf0f8c4ebca90d9cfe0f4aa">
+            </div>
+            <div class="form-group">
+                <label for="instructionsText">Instructions Text:</label>
+                <input type="text" id="instructionsText" value="රැදි සිටින්න …… : Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න .">
+            </div>
+            <div class="form-group">
+                <label for="engagementSimulation">Auto Engagement:</label>
+                <select id="engagementSimulation">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="clickDelay">Auto Click Delay (seconds):</label>
+                <input type="number" id="clickDelay" min="1" max="30" value="5">
+            </div>
+            <div class="config-buttons">
+                <button type="button" class="config-btn save-config" id="saveConfig">Save Configuration</button>
+                <button type="button" class="config-btn close-config" id="closeConfig">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Config Toggle Button -->
+    <button class="config-toggle" id="configToggle">
+        <i class="fas fa-cog"></i>
+    </button>
+    
     <!-- Fixed Header with SMALL GREEN BUTTON on right -->
     <div class="header">
         <div class="header-title">
@@ -377,7 +601,7 @@
             </div>
             
             <div class="ads-counter">
-                Ad <span id="currentAd">1</span> of 3
+                Ad <span id="currentAd">1</span> of <span id="totalAdsDisplay">3</span>
             </div>
         </div>
         
@@ -393,12 +617,18 @@
             <i class="fas fa-info-circle"></i>
             <h3> රැදි සිටින්න …… :</h3>
         </div>
-        <p>Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න .</p>
+        <p id="instructionsTextDisplay">Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න .</p>
     </div>
     
     <!-- Ad Content Area -->
     <div class="content-container">
-        <div class="ad-frame-container">
+        <div class="ad-frame-container" id="adContainer">
+            <!-- Engagement Status -->
+            <div class="engagement-status hidden" id="engagementStatus">
+                <i class="fas fa-robot"></i>
+                <span>Auto-engagement Active</span>
+            </div>
+            
             <!-- Overlay shown between ads -->
             <div class="ad-overlay" id="adOverlay">
                 <div class="overlay-icon">
@@ -416,16 +646,8 @@
         </div>
         
         <!-- Ad Status Indicators with labels -->
-        <div class="ad-indicators">
-            <div class="ad-indicator active" id="indicator1">
-                <div class="ad-indicator-text">Ad 1</div>
-            </div>
-            <div class="ad-indicator" id="indicator2">
-                <div class="ad-indicator-text">Ad 2</div>
-            </div>
-            <div class="ad-indicator" id="indicator3">
-                <div class="ad-indicator-text">Ad 3</div>
-            </div>
+        <div class="ad-indicators" id="adIndicators">
+            <!-- Indicators will be generated dynamically -->
         </div>
     </div>
     
@@ -435,42 +657,62 @@
     </div>
 
     <script>
-        // Configuration
-        const TOTAL_ADS = 3;
-        const TIME_PER_AD = 10; // seconds
-        const ORIGINAL_URL = "https://t.me/Salalihiniyasl_bot?start=BQADAQADRxAAAqDteEcvaZuP5EsXlRYE"; // boturls VID001 with your actual URL
+        // Configuration - All in one place for easy updates
+        const DEFAULT_CONFIG = {
+            totalAds: 3,
+            timePerAd: 10, // seconds
+            videoUrl: "https://t.me/Salalihiniyasl_bot?start=BQADAQADQhEAAqDtgEc3bO3u8eHNTxYE",
+            adUrls: [
+                "https://www.effectivegatecpm.com/i9q1y7nvv?key=ac01236d2cc3992387c55fe1f97dce50",
+                "https://www.effectivegatecpm.com/zv20wxy0?key=fc320d9845eafdf29ef8f630bff6b872",
+                "https://www.effectivegatecpm.com/tzrrbk2dri?key=b3b5c86d1cf0f8c4ebca90d9cfe0f4aa"
+            ],
+            instructionsText: "රැදි සිටින්න …… : Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න .",
+            engagementSimulation: true,
+            clickDelay: 5
+        };
         
-        // AdsterraURLs for testing (safe, educational content)
-        const AD_URLS = [
-            "https://www.effectivegatecpm.com/gqxatvnh?key=520411ef3fa301739c39e53ee8a722a7",
-            "https://www.effectivegatecpm.com/zv20wxy0?key=fc320d9845eafdf29ef8f630bff6b872",
-            "https://www.effectivegatecpm.com/tzrrbk2dri?key=b3b5c86d1cf0f8c4ebca90d9cfe0f4aa"
-        ];
+        // Load configuration from localStorage or use defaults
+        let CONFIG = JSON.parse(localStorage.getItem('adUnlockerConfig')) || DEFAULT_CONFIG;
         
         // State variables
         let currentAd = 1;
-        let timeLeft = TIME_PER_AD;
+        let timeLeft = CONFIG.timePerAd;
         let timerInterval;
         let adsCompleted = 0;
         let isTransitioning = false;
+        let autoEngagementEnabled = CONFIG.engagementSimulation;
+        let engagementInterval;
+        let autoClickInterval;
+        let autoClickCount = 0;
+        let clickDelay = CONFIG.clickDelay;
+        let autoClickTimer = 0;
         
         // DOM Elements
         const timerElement = document.getElementById('timer');
         const currentAdElement = document.getElementById('currentAd');
+        const totalAdsDisplay = document.getElementById('totalAdsDisplay');
         const adFrame = document.getElementById('adFrame');
+        const adContainer = document.getElementById('adContainer');
         const adOverlay = document.getElementById('adOverlay');
         const overlayText = document.getElementById('overlayText');
         const loadingProgress = document.getElementById('loadingProgress');
         const unlockButtonHeader = document.getElementById('unlockButtonHeader');
         const instructionsPanel = document.getElementById('instructionsPanel');
-        const indicators = [
-            document.getElementById('indicator1'),
-            document.getElementById('indicator2'),
-            document.getElementById('indicator3')
-        ];
+        const instructionsTextDisplay = document.getElementById('instructionsTextDisplay');
+        const adIndicators = document.getElementById('adIndicators');
+        const configSection = document.getElementById('configSection');
+        const configToggle = document.getElementById('configToggle');
+        const configForm = document.getElementById('configForm');
+        const saveConfigBtn = document.getElementById('saveConfig');
+        const closeConfigBtn = document.getElementById('closeConfig');
+        const engagementStatus = document.getElementById('engagementStatus');
         
         // Initialize the content locker
         function initContentLocker() {
+            // Apply configuration
+            applyConfiguration();
+            
             // Show instructions for 3 seconds
             instructionsPanel.classList.add('show');
             setTimeout(() => {
@@ -479,23 +721,75 @@
             }, 3000);
             
             startTimer();
+            
+            // Show engagement status if enabled
+            if (autoEngagementEnabled) {
+                engagementStatus.classList.remove('hidden');
+                adContainer.classList.add('auto-click-active');
+            }
+        }
+        
+        // Apply configuration to UI
+        function applyConfiguration() {
+            // Update displays
+            totalAdsDisplay.textContent = CONFIG.totalAds;
+            instructionsTextDisplay.textContent = CONFIG.instructionsText;
+            
+            // Update timer
+            timeLeft = CONFIG.timePerAd;
+            timerElement.textContent = timeLeft.toString().padStart(2, '0');
+            
+            // Update engagement settings
+            autoEngagementEnabled = CONFIG.engagementSimulation;
+            clickDelay = CONFIG.clickDelay;
+            
+            // Generate indicators
+            generateIndicators();
+        }
+        
+        // Generate ad indicators based on configuration
+        function generateIndicators() {
+            adIndicators.innerHTML = '';
+            
+            for (let i = 1; i <= CONFIG.totalAds; i++) {
+                const indicator = document.createElement('div');
+                indicator.className = 'ad-indicator';
+                indicator.id = `indicator${i}`;
+                
+                const text = document.createElement('div');
+                text.className = 'ad-indicator-text';
+                text.textContent = `Ad ${i}`;
+                
+                indicator.appendChild(text);
+                adIndicators.appendChild(indicator);
+            }
+        }
+        
+        // Get indicator element
+        function getIndicator(index) {
+            return document.getElementById(`indicator${index}`);
         }
         
         // Load the current ad into iframe
         function loadAd() {
             isTransitioning = true;
             
+            // Reset auto-click timer
+            autoClickTimer = 0;
+            autoClickCount = 0;
+            
             // Show overlay with loading message
             adOverlay.classList.remove('hidden');
-            overlayText.textContent = `Loading advertisement ${currentAd} of ${TOTAL_ADS}...`;
+            overlayText.textContent = `Loading advertisement ${currentAd} of ${CONFIG.totalAds}...`;
             
             // Reset loading progress
             loadingProgress.style.width = '0%';
             
-            // Load the ad after a short delay (simulate loading time)
+            // Load the ad after a short delay
             setTimeout(() => {
-                // Set iframe source to Wikipedia URL
-                adFrame.src = AD_URLS[currentAd - 1];
+                // Set iframe source to ad URL
+                const adUrl = CONFIG.adUrls[currentAd - 1] || CONFIG.adUrls[0];
+                adFrame.src = adUrl;
                 
                 // Hide overlay after iframe loads
                 adFrame.onload = () => {
@@ -503,6 +797,11 @@
                         adOverlay.classList.add('hidden');
                         isTransitioning = false;
                         updateOverlayForNextAd();
+                        
+                        // Start engagement simulation after ad loads
+                        if (autoEngagementEnabled) {
+                            startEngagementSimulation();
+                        }
                     }, 500);
                 };
                 
@@ -511,12 +810,15 @@
                 
                 // Start the timer for this ad
                 startTimer();
+                
+                // Start auto-click timer
+                startAutoClickTimer();
             }, 1000);
         }
         
         // Update overlay text for next ad
         function updateOverlayForNextAd() {
-            if (currentAd < TOTAL_ADS) {
+            if (currentAd < CONFIG.totalAds) {
                 overlayText.textContent = `Advertisement ${currentAd + 1} will start in a moment...`;
             } else {
                 overlayText.textContent = "All ads completed! Preparing your content...";
@@ -526,7 +828,7 @@
         // Start the countdown timer
         function startTimer() {
             clearInterval(timerInterval);
-            timeLeft = TIME_PER_AD;
+            timeLeft = CONFIG.timePerAd;
             updateTimerDisplay();
             
             timerInterval = setInterval(() => {
@@ -534,7 +836,7 @@
                 updateTimerDisplay();
                 
                 // Update loading progress in overlay
-                const progress = ((TIME_PER_AD - timeLeft) / TIME_PER_AD) * 100;
+                const progress = ((CONFIG.timePerAd - timeLeft) / CONFIG.timePerAd) * 100;
                 loadingProgress.style.width = `${progress}%`;
                 
                 // When timer reaches zero
@@ -545,6 +847,121 @@
             }, 1000);
         }
         
+        // Start auto-click timer
+        function startAutoClickTimer() {
+            clearInterval(autoClickInterval);
+            autoClickTimer = 0;
+            
+            autoClickInterval = setInterval(() => {
+                autoClickTimer++;
+                
+                // Check if it's time to auto-click (every clickDelay seconds)
+                if (autoClickTimer >= clickDelay && autoEngagementEnabled && !isTransitioning) {
+                    performAutoClick();
+                    autoClickTimer = 0; // Reset timer after click
+                }
+            }, 1000);
+        }
+        
+        // Perform automatic click simulation
+        function performAutoClick() {
+            if (isTransitioning || !autoEngagementEnabled) return;
+            
+            autoClickCount++;
+            
+            // Create mouse movement events to simulate real user
+            simulateMouseMovement();
+            
+            // Open ad in new tab (first click)
+            if (autoClickCount <= 2) {
+                openAdInNewTab();
+            }
+            
+            // Update engagement status
+            engagementStatus.innerHTML = `<i class="fas fa-robot"></i> Auto-click ${autoClickCount}/2`;
+            
+            // Reset counter after 2 clicks
+            if (autoClickCount >= 2) {
+                setTimeout(() => {
+                    autoClickCount = 0;
+                    engagementStatus.innerHTML = `<i class="fas fa-robot"></i> Auto-engagement Active`;
+                }, 3000);
+            }
+            
+            console.log(`Auto-click performed: ${autoClickCount}/2`);
+        }
+        
+        // Simulate mouse movement over ad area
+        function simulateMouseMovement() {
+            const rect = adContainer.getBoundingClientRect();
+            
+            // Generate random positions around the center
+            const randomX = rect.left + rect.width / 2 + (Math.random() * 100 - 50);
+            const randomY = rect.top + rect.height / 2 + (Math.random() * 100 - 50);
+            
+            // Create and dispatch mousemove event
+            const moveEvent = new MouseEvent('mousemove', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: randomX,
+                clientY: randomY
+            });
+            
+            adContainer.dispatchEvent(moveEvent);
+            
+            // Simulate mouse enter/leave
+            setTimeout(() => {
+                const enterEvent = new MouseEvent('mouseenter', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                adContainer.dispatchEvent(enterEvent);
+            }, 100);
+        }
+        
+        // Open ad in new tab (simulated click)
+        function openAdInNewTab() {
+            const currentAdUrl = CONFIG.adUrls[currentAd - 1];
+            if (!currentAdUrl) return;
+            
+            // Try to open in new tab (may be blocked by popup blocker)
+            try {
+                const newTab = window.open(currentAdUrl, '_blank', 'noopener,noreferrer,width=800,height=600');
+                
+                if (newTab) {
+                    // Close the tab after 8-12 seconds (simulates user viewing)
+                    const closeDelay = 8000 + Math.random() * 4000;
+                    setTimeout(() => {
+                        try {
+                            newTab.close();
+                            console.log('Auto-opened tab closed');
+                        } catch (e) {
+                            // Tab might be blocked or already closed
+                        }
+                    }, closeDelay);
+                }
+            } catch (e) {
+                console.log('Popup blocked by browser');
+            }
+        }
+        
+        // Start engagement simulation
+        function startEngagementSimulation() {
+            // Clear any existing engagement interval
+            if (engagementInterval) {
+                clearInterval(engagementInterval);
+            }
+            
+            // Start new engagement simulation
+            engagementInterval = setInterval(() => {
+                if (!isTransitioning && autoEngagementEnabled) {
+                    simulateMouseMovement();
+                }
+            }, 2000); // Simulate movement every 2 seconds
+        }
+        
         // Update the timer display
         function updateTimerDisplay() {
             timerElement.textContent = timeLeft.toString().padStart(2, '0');
@@ -552,26 +969,37 @@
         
         // Update ad indicators
         function updateIndicators() {
-            indicators.forEach((indicator, index) => {
-                indicator.classList.remove('active', 'completed');
-                
-                if (index + 1 === currentAd) {
-                    indicator.classList.add('active');
-                } else if (index + 1 < currentAd) {
-                    indicator.classList.add('completed');
+            for (let i = 1; i <= CONFIG.totalAds; i++) {
+                const indicator = getIndicator(i);
+                if (indicator) {
+                    indicator.classList.remove('active', 'completed');
+                    
+                    if (i === currentAd) {
+                        indicator.classList.add('active');
+                    } else if (i < currentAd) {
+                        indicator.classList.add('completed');
+                    }
                 }
-            });
+            }
         }
         
         // Mark current ad as completed and move to next
         function completeCurrentAd() {
+            // Stop engagement simulation for this ad
+            if (engagementInterval) {
+                clearInterval(engagementInterval);
+            }
+            if (autoClickInterval) {
+                clearInterval(autoClickInterval);
+            }
+            
             adsCompleted++;
             
             // Update current ad counter
             currentAdElement.textContent = currentAd;
             
             // If all ads completed, enable the button
-            if (adsCompleted >= TOTAL_ADS) {
+            if (adsCompleted >= CONFIG.totalAds) {
                 allAdsCompleted();
                 return;
             }
@@ -598,6 +1026,14 @@
         
         // When all ads are completed
         function allAdsCompleted() {
+            // Stop all intervals
+            if (engagementInterval) clearInterval(engagementInterval);
+            if (autoClickInterval) clearInterval(autoClickInterval);
+            
+            // Hide engagement status
+            engagementStatus.classList.add('hidden');
+            adContainer.classList.remove('auto-click-active');
+            
             // Clear iframe
             adFrame.src = "about:blank";
             
@@ -611,10 +1047,13 @@
             timerElement.style.color = "#10b981";
             
             // Update indicators
-            indicators.forEach(indicator => {
-                indicator.classList.add('completed');
-                indicator.classList.remove('active');
-            });
+            for (let i = 1; i <= CONFIG.totalAds; i++) {
+                const indicator = getIndicator(i);
+                if (indicator) {
+                    indicator.classList.add('completed');
+                    indicator.classList.remove('active');
+                }
+            }
             
             // Enable the unlock button (small green button in header)
             unlockButtonHeader.disabled = false;
@@ -622,12 +1061,12 @@
             unlockButtonHeader.classList.add('unlocked');
             
             // Update current ad display
-            currentAdElement.textContent = "3";
+            currentAdElement.textContent = CONFIG.totalAds;
             currentAdElement.style.color = "#10b981";
         }
         
-        // Redirect to original URL when button is clicked
-        function redirectToOriginalUrl() {
+        // Redirect to video URL when button is clicked
+        function redirectToVideoUrl() {
             // Show loading state
             unlockButtonHeader.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
             unlockButtonHeader.disabled = true;
@@ -638,15 +1077,8 @@
             
             // Redirect after short delay
             setTimeout(() => {
-                // For testing, we'll use a test URL (YouTube)
-                // In production, replace with your actual URL
-                const testUrl = "https://t.me/Salalihiniyasl_bot?start=BQADAQADRxAAAqDteEcvaZuP5EsXlRYE";
-                
                 // Open in new tab
-                window.open(testUrl, '_blank');
-                
-                // Alternatively, you can redirect in the same tab:
-                // window.location.href = ORIGINAL_URL;
+                window.open(CONFIG.videoUrl, '_blank');
                 
                 // Show completion message
                 overlayText.textContent = "විඩියෝ එක තියන BOT වෙත ඔබ යොමුකර ඇත කරුණාකර ක්‍රියා නොකරයි නම් ඉහත REDIRECTED බටනය ක්ලික් කරන්න";
@@ -659,8 +1091,96 @@
             }, 1500);
         }
         
+        // Toggle configuration panel
+        function toggleConfigPanel() {
+            if (configSection.classList.contains('show')) {
+                configSection.classList.remove('show');
+            } else {
+                // Load current config into form
+                document.getElementById('totalAds').value = CONFIG.totalAds;
+                document.getElementById('timePerAd').value = CONFIG.timePerAd;
+                document.getElementById('videoUrl').value = CONFIG.videoUrl;
+                document.getElementById('adUrl1').value = CONFIG.adUrls[0] || '';
+                document.getElementById('adUrl2').value = CONFIG.adUrls[1] || '';
+                document.getElementById('adUrl3').value = CONFIG.adUrls[2] || '';
+                document.getElementById('instructionsText').value = CONFIG.instructionsText;
+                document.getElementById('engagementSimulation').value = CONFIG.engagementSimulation;
+                document.getElementById('clickDelay').value = CONFIG.clickDelay;
+                
+                configSection.classList.add('show');
+            }
+        }
+        
+        // Save configuration
+        function saveConfiguration() {
+            const newConfig = {
+                totalAds: parseInt(document.getElementById('totalAds').value) || 3,
+                timePerAd: parseInt(document.getElementById('timePerAd').value) || 10,
+                videoUrl: document.getElementById('videoUrl').value || DEFAULT_CONFIG.videoUrl,
+                adUrls: [
+                    document.getElementById('adUrl1').value || DEFAULT_CONFIG.adUrls[0],
+                    document.getElementById('adUrl2').value || DEFAULT_CONFIG.adUrls[1],
+                    document.getElementById('adUrl3').value || DEFAULT_CONFIG.adUrls[2]
+                ],
+                instructionsText: document.getElementById('instructionsText').value || DEFAULT_CONFIG.instructionsText,
+                engagementSimulation: document.getElementById('engagementSimulation').value === 'true',
+                clickDelay: parseInt(document.getElementById('clickDelay').value) || 5
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('adUnlockerConfig', JSON.stringify(newConfig));
+            
+            // Update config
+            CONFIG = newConfig;
+            
+            // Reset and restart the locker
+            resetLocker();
+            
+            // Close config panel
+            configSection.classList.remove('show');
+            
+            // Show success message
+            alert('Configuration saved successfully! The page will reload with new settings.');
+        }
+        
+        // Reset locker with new configuration
+        function resetLocker() {
+            // Clear intervals
+            clearInterval(timerInterval);
+            clearInterval(engagementInterval);
+            clearInterval(autoClickInterval);
+            
+            // Reset state
+            currentAd = 1;
+            timeLeft = CONFIG.timePerAd;
+            adsCompleted = 0;
+            isTransitioning = false;
+            autoClickCount = 0;
+            autoClickTimer = 0;
+            autoEngagementEnabled = CONFIG.engagementSimulation;
+            clickDelay = CONFIG.clickDelay;
+            
+            // Reset UI
+            unlockButtonHeader.disabled = true;
+            unlockButtonHeader.innerHTML = '<i class="fas fa-lock"></i> GO TO VIDEO';
+            unlockButtonHeader.classList.remove('unlocked');
+            engagementStatus.classList.add('hidden');
+            adContainer.classList.remove('auto-click-active');
+            
+            // Apply configuration
+            applyConfiguration();
+            
+            // Restart
+            initContentLocker();
+        }
+        
         // Event listeners
-        unlockButtonHeader.addEventListener('click', redirectToOriginalUrl);
+        unlockButtonHeader.addEventListener('click', redirectToVideoUrl);
+        configToggle.addEventListener('click', toggleConfigPanel);
+        saveConfigBtn.addEventListener('click', saveConfiguration);
+        closeConfigBtn.addEventListener('click', () => {
+            configSection.classList.remove('show');
+        });
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', initContentLocker);
