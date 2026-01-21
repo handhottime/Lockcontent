@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Content Unlocker | Watch Ads to Continue</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Configuration Section - Easy to Update */
+        .config-section {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 100px 20px 20px;
+            border: 2px solid #3b82f6;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            z-index: 2000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .config-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .config-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #60a5fa;
+            font-size: 1.5rem;
+        }
+        
+        .config-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .config-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .config-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-config {
+            background: linear-gradient(to right, #10b981, #059669);
+            color: white;
+        }
+        
+        .close-config {
+            background: linear-gradient(to right, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .config-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .config-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(to right, #3b82f6, #1e40af);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .config-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.6);
+        }
+        
+        /* Fixed Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to right, #1e40af, #3b82f6);
+            padding: 18px 20px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .timer-container {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        .timer {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fbbf24;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .ads-counter {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        /* SMALL GREEN GO TO VIDEO BUTTON - Right side of header */
+        .unlock-btn-header {
+            background: linear-gradient(to right, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+            min-width: 140px;
+        }
+        
+        .unlock-btn-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .unlock-btn-header:active {
+            transform: translateY(0);
+        }
+        
+        .unlock-btn-header:disabled {
+            background: linear-gradient(to right, #475569, #64748b);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .unlock-btn-header i {
+            font-size: 1rem;
+        }
+        
+        /* Ad Content Area */
+        .content-container {
+            margin-top: 90px; /* Space for fixed header */
+            height: calc(100vh - 90px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ad-frame-container {
+            flex: 1;
+            background-color: #1e293b;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ad-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .ad-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .ad-overlay.hidden {
+            display: none;
+        }
+        
+        .overlay-icon {
+            font-size: 4rem;
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+        
+        .overlay-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #fbbf24;
+        }
+        
+        .overlay-text {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            max-width: 500px;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+        
+        .loading-bar {
+            width: 100%;
+            max-width: 400px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(to right, #3b82f6, #60a5fa);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Ad Status Indicators */
+        .ad-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 0 20px;
+        }
+        
+        .ad-indicator {
+            flex: 1;
+            max-width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background-color: #475569;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ad-indicator.active {
+            background-color: #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+        
+        .ad-indicator.completed {
+            background-color: #10b981;
+        }
+        
+        .ad-indicator-text {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        
+        .ad-indicator.active .ad-indicator-text {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .ad-indicator.completed .ad-indicator-text {
+            color: #10b981;
+        }
+        
+        /* Instructions Panel */
+        .instructions-panel {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px;
+            border-left: 4px solid #3b82f6;
+            display: none;
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            right: 20px;
+            z-index: 20;
+        }
+        
+        .instructions-panel.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .instructions-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #60a5fa;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: #1e293b;
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #334155;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px 20px;
+            }
+            
+            .header-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .unlock-btn-header {
+                position: absolute;
+                top: 15px;
+                right: 20px;
+                min-width: 130px;
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .header-title {
+                margin-right: 150px;
+            }
+            
+            .content-container {
+                margin-top: 120px;
+                height: calc(100vh - 120px);
+            }
+            
+            .overlay-title {
+                font-size: 1.5rem;
+            }
+            
+            .overlay-text {
+                font-size: 1rem;
+            }
+            
+            .config-section {
+                margin: 120px 10px 10px;
+                left: 10px;
+                right: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .timer {
+                font-size: 1.2rem;
+            }
+            
+            .ads-counter {
+                font-size: 0.8rem;
+            }
+            
+            .unlock-btn-header {
+                min-width: 120px;
+                padding: 7px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .header-title {
+                margin-right: 130px;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Completion animation */
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        .unlock-btn-header.unlocked {
+            animation: pulseGreen 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Configuration Section (Hidden by default) -->
+    <div class="config-section" id="configSection">
+        <div class="config-title">
+            <i class="fas fa-cog"></i>
+            <h3>Configuration Settings</h3>
+        </div>
+        <div class="config-form" id="configForm">
+            <div class="form-group">
+                <label for="totalAds">Total Ads (1-10):</label>
+                <input type="number" id="totalAds" min="1" max="10" value="3">
+            </div>
+            <div class="form-group">
+                <label for="timePerAd">Time Per Ad (seconds):</label>
+                <input type="number" id="timePerAd" min="5" max="60" value="10">
+            </div>
+            <div class="form-group">
+                <label for="videoUrl">Video URL:</label>
+                <input type="text" id="videoUrl" value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+            </div>
+            <div class="form-group">
+                <label for="adUrl1">Ad URL 1:</label>
+                <input type="text" id="adUrl1" value="https://www.effectivegatecpm.com/i9q1y7nvv?key=ac01236d2cc3992387c55fe1f97dce50">
+            </div>
+            <div class="form-group">
+                <label for="adUrl2">Ad URL 2:</label>
+                <input type="text" id="adUrl2" value="https://www.effectivegatecpm.com/zv20wxy0?key=fc320d9845eafdf29ef8f630bff6b872">
+            </div>
+            <div class="form-group">
+                <label for="adUrl3">Ad URL 3:</label>
+                <input type="text" id="adUrl3" value="https://www.effectivegatecpm.com/tzrrbk2dri?key=b3b5c86d1cf0f8c4ebca90d9cfe0f4aa">
+            </div>
+            <div class="form-group">
+                <label for="instructionsText">Instructions Text:</label>
+                <input type="text" id="instructionsText" value="රැදි සිටින්න …… : Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න .">
+            </div>
+            <div class="config-buttons">
+                <button type="button" class="config-btn save-config" id="saveConfig">Save Configuration</button>
+                <button type="button" class="config-btn close-config" id="closeConfig">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Config Toggle Button -->
+    <button class="config-toggle" id="configToggle">
+        <i class="fas fa-cog"></i>
+    </button>
+    
+    <!-- Fixed Header with SMALL GREEN BUTTON on right -->
+    <div class="header">
+        <div class="header-title">
+            <i class="fas fa-lock"></i>
+            <h1>Link එක ලබා ගැනිම සදහා රැදි සිටින්න</h1>
+        </div>
+        
+        <div class="header-info">
+            <div class="timer-container">
+                <i class="far fa-clock"></i>
+                <span class="timer" id="timer">15</span>
+            </div>
+            
+            <div class="ads-counter">
+                Ad <span id="currentAd">1</span> of <span id="totalAdsDisplay">3</span>
+            </div>
+        </div>
+        
+        <!-- SMALL GREEN GO TO VIDEO BUTTON on right side -->
+        <button class="unlock-btn-header" id="unlockButtonHeader" disabled>
+            <i class="fas fa-lock"></i> GO TO VIDEO
+        </button>
+    </div>
+    
+    <!-- Instructions Panel (shown only at start) -->
+    <div class="instructions-panel" id="instructionsPanel">
+        <div class="instructions-title">
+            <i class="fas fa-info-circle"></i>
+            <h3> රැදි සිටින්න …… :</h3>
+        </div>
+        <p id="instructionsTextDisplay">Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න .</p>
+    </div>
+    
+    <!-- Ad Content Area -->
+    <div class="content-container">
+        <div class="ad-frame-container">
+            <!-- Overlay shown between ads -->
+            <div class="ad-overlay" id="adOverlay">
+                <div class="overlay-icon">
+                    <i class="fas fa-ad"></i>
+                </div>
+                <div class="overlay-title">කරුණාකර රැදි සිටින්න</div>
+                <div class="overlay-text" id="overlayText">Preparing ad #1 of 3. Please wait...</div>
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loadingProgress"></div>
+                </div>
+            </div>
+            
+            <!-- Iframe for loading ad URLs -->
+            <iframe class="ad-frame" id="adFrame" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+        
+        <!-- Ad Status Indicators with labels -->
+        <div class="ad-indicators" id="adIndicators">
+            <!-- Indicators will be generated dynamically -->
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>විඩියෝව නරඹිම සදහා දැන්විම් 03 ක් අවසන් වනතෙක් රැදිසිටිය යුතුය </p>
+    </div>
+
+    <script>
+        // Configuration - All in one place for easy updates
+        const DEFAULT_CONFIG = {
+            totalAds: 3,
+            timePerAd: 10, // seconds
+            videoUrl: "https://www.facebook.com",
+            adUrls: [
+                "https://www.effectivegatecpm.com/i9q1y7nvv?key=ac01236d2cc3992387c55fe1f97dce50",
+                "https://www.effectivegatecpm.com/zv20wxy0?key=fc320d9845eafdf29ef8f630bff6b872",
+                "https://www.effectivegatecpm.com/tzrrbk2dri?key=b3b5c86d1cf0f8c4ebca90d9cfe0f4aa"
+            ],
+            instructionsText: "රැදි සිටින්න …… : Link එක ලබා ගැනිම සදහා දැන්විම් 03ක් නැරඹිම සිදුකල යුතු අතර ඉහත කාලය අවසන් වනතුරු රැදිසිට GO TO VIDEO මගින් Telegram Video ලබා ගන්න ."
+        };
+        
+        // Load configuration from localStorage or use defaults
+        let CONFIG = JSON.parse(localStorage.getItem('adUnlockerConfig')) || DEFAULT_CONFIG;
+        
+        // State variables
+        let currentAd = 1;
+        let timeLeft = CONFIG.timePerAd;
+        let timerInterval;
+        let adsCompleted = 0;
+        let isTransitioning = false;
+        
+        // DOM Elements
+        const timerElement = document.getElementById('timer');
+        const currentAdElement = document.getElementById('currentAd');
+        const totalAdsDisplay = document.getElementById('totalAdsDisplay');
+        const adFrame = document.getElementById('adFrame');
+        const adOverlay = document.getElementById('adOverlay');
+        const overlayText = document.getElementById('overlayText');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const unlockButtonHeader = document.getElementById('unlockButtonHeader');
+        const instructionsPanel = document.getElementById('instructionsPanel');
+        const instructionsTextDisplay = document.getElementById('instructionsTextDisplay');
+        const adIndicators = document.getElementById('adIndicators');
+        const configSection = document.getElementById('configSection');
+        const configToggle = document.getElementById('configToggle');
+        const configForm = document.getElementById('configForm');
+        const saveConfigBtn = document.getElementById('saveConfig');
+        const closeConfigBtn = document.getElementById('closeConfig');
+        
+        // Initialize the content locker
+        function initContentLocker() {
+            // Apply configuration
+            applyConfiguration();
+            
+            // Show instructions for 3 seconds
+            instructionsPanel.classList.add('show');
+            setTimeout(() => {
+                instructionsPanel.classList.remove('show');
+                loadAd();
+            }, 3000);
+            
+            startTimer();
+        }
+        
+        // Apply configuration to UI
+        function applyConfiguration() {
+            // Update displays
+            totalAdsDisplay.textContent = CONFIG.totalAds;
+            instructionsTextDisplay.textContent = CONFIG.instructionsText;
+            
+            // Update timer
+            timeLeft = CONFIG.timePerAd;
+            timerElement.textContent = timeLeft.toString().padStart(2, '0');
+            
+            // Generate indicators
+            generateIndicators();
+        }
+        
+        // Generate ad indicators based on configuration
+        function generateIndicators() {
+            adIndicators.innerHTML = '';
+            
+            for (let i = 1; i <= CONFIG.totalAds; i++) {
+                const indicator = document.createElement('div');
+                indicator.className = 'ad-indicator';
+                indicator.id = `indicator${i}`;
+                
+                const text = document.createElement('div');
+                text.className = 'ad-indicator-text';
+                text.textContent = `Ad ${i}`;
+                
+                indicator.appendChild(text);
+                adIndicators.appendChild(indicator);
+            }
+        }
+        
+        // Get indicator element
+        function getIndicator(index) {
+            return document.getElementById(`indicator${index}`);
+        }
+        
+        // Load the current ad into iframe
+        function loadAd() {
+            isTransitioning = true;
+            
+            // Show overlay with loading message
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = `Loading advertisement ${currentAd} of ${CONFIG.totalAds}...`;
+            
+            // Reset loading progress
+            loadingProgress.style.width = '0%';
+            
+            // Load the ad after a short delay
+            setTimeout(() => {
+                // Set iframe source to ad URL
+                const adUrl = CONFIG.adUrls[currentAd - 1] || CONFIG.adUrls[0];
+                adFrame.src = adUrl;
+                
+                // Hide overlay after iframe loads
+                adFrame.onload = () => {
+                    setTimeout(() => {
+                        adOverlay.classList.add('hidden');
+                        isTransitioning = false;
+                        updateOverlayForNextAd();
+                    }, 500);
+                };
+                
+                // Update indicators
+                updateIndicators();
+                
+                // Start the timer for this ad
+                startTimer();
+            }, 1000);
+        }
+        
+        // Update overlay text for next ad
+        function updateOverlayForNextAd() {
+            if (currentAd < CONFIG.totalAds) {
+                overlayText.textContent = `Advertisement ${currentAd + 1} will start in a moment...`;
+            } else {
+                overlayText.textContent = "All ads completed! Preparing your content...";
+            }
+        }
+        
+        // Start the countdown timer
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = CONFIG.timePerAd;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                // Update loading progress in overlay
+                const progress = ((CONFIG.timePerAd - timeLeft) / CONFIG.timePerAd) * 100;
+                loadingProgress.style.width = `${progress}%`;
+                
+                // When timer reaches zero
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    completeCurrentAd();
+                }
+            }, 1000);
+        }
+        
+        // Update the timer display
+        function updateTimerDisplay() {
+            timerElement.textContent = timeLeft.toString().padStart(2, '0');
+        }
+        
+        // Update ad indicators
+        function updateIndicators() {
+            for (let i = 1; i <= CONFIG.totalAds; i++) {
+                const indicator = getIndicator(i);
+                if (indicator) {
+                    indicator.classList.remove('active', 'completed');
+                    
+                    if (i === currentAd) {
+                        indicator.classList.add('active');
+                    } else if (i < currentAd) {
+                        indicator.classList.add('completed');
+                    }
+                }
+            }
+        }
+        
+        // Mark current ad as completed and move to next
+        function completeCurrentAd() {
+            adsCompleted++;
+            
+            // Update current ad counter
+            currentAdElement.textContent = currentAd;
+            
+            // If all ads completed, enable the button
+            if (adsCompleted >= CONFIG.totalAds) {
+                allAdsCompleted();
+                return;
+            }
+            
+            // Move to next ad
+            currentAd++;
+            
+            // Show overlay before loading next ad
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = `Advertisement ${currentAd} starting in 3 seconds...`;
+            
+            // Show countdown for next ad
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                overlayText.textContent = `Advertisement ${currentAd} starting in ${countdown} seconds...`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    loadAd();
+                }
+            }, 1000);
+        }
+        
+        // When all ads are completed
+        function allAdsCompleted() {
+            // Clear iframe
+            adFrame.src = "about:blank";
+            
+            // Update UI
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = "All ads completed! Click the green 'GO TO VIDEO' button to access your content.";
+            loadingProgress.style.width = "100%";
+            
+            // Update timer display
+            timerElement.textContent = "00";
+            timerElement.style.color = "#10b981";
+            
+            // Update indicators
+            for (let i = 1; i <= CONFIG.totalAds; i++) {
+                const indicator = getIndicator(i);
+                if (indicator) {
+                    indicator.classList.add('completed');
+                    indicator.classList.remove('active');
+                }
+            }
+            
+            // Enable the unlock button (small green button in header)
+            unlockButtonHeader.disabled = false;
+            unlockButtonHeader.innerHTML = '<i class="fas fa-unlock"></i> GO TO VIDEO';
+            unlockButtonHeader.classList.add('unlocked');
+            
+            // Update current ad display
+            currentAdElement.textContent = CONFIG.totalAds;
+            currentAdElement.style.color = "#10b981";
+        }
+        
+        // Redirect to video URL when button is clicked
+        function redirectToVideoUrl() {
+            // Show loading state
+            unlockButtonHeader.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+            unlockButtonHeader.disabled = true;
+            
+            // Update overlay
+            adOverlay.classList.remove('hidden');
+            overlayText.textContent = "Redirecting to your video content...";
+            
+            // Redirect after short delay
+            setTimeout(() => {
+                // Open in new tab
+                window.open(CONFIG.videoUrl, '_blank');
+                
+                // Show completion message
+                overlayText.textContent = "විඩියෝ එක තියන BOT වෙත ඔබ යොමුකර ඇත කරුණාකර ක්‍රියා නොකරයි නම් ඉහත REDIRECTED බටනය ක්ලික් කරන්න";
+                
+                // Reset button after a moment
+                setTimeout(() => {
+                    unlockButtonHeader.innerHTML = '<i class="fas fa-check"></i> REDIRECTED';
+                    unlockButtonHeader.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+        
+        // Toggle configuration panel
+        function toggleConfigPanel() {
+            if (configSection.classList.contains('show')) {
+                configSection.classList.remove('show');
+            } else {
+                // Load current config into form
+                document.getElementById('totalAds').value = CONFIG.totalAds;
+                document.getElementById('timePerAd').value = CONFIG.timePerAd;
+                document.getElementById('videoUrl').value = CONFIG.videoUrl;
+                document.getElementById('adUrl1').value = CONFIG.adUrls[0] || '';
+                document.getElementById('adUrl2').value = CONFIG.adUrls[1] || '';
+                document.getElementById('adUrl3').value = CONFIG.adUrls[2] || '';
+                document.getElementById('instructionsText').value = CONFIG.instructionsText;
+                
+                configSection.classList.add('show');
+            }
+        }
+        
+        // Save configuration
+        function saveConfiguration() {
+            const newConfig = {
+                totalAds: parseInt(document.getElementById('totalAds').value) || 3,
+                timePerAd: parseInt(document.getElementById('timePerAd').value) || 10,
+                videoUrl: document.getElementById('videoUrl').value || DEFAULT_CONFIG.videoUrl,
+                adUrls: [
+                    document.getElementById('adUrl1').value || DEFAULT_CONFIG.adUrls[0],
+                    document.getElementById('adUrl2').value || DEFAULT_CONFIG.adUrls[1],
+                    document.getElementById('adUrl3').value || DEFAULT_CONFIG.adUrls[2]
+                ],
+                instructionsText: document.getElementById('instructionsText').value || DEFAULT_CONFIG.instructionsText
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('adUnlockerConfig', JSON.stringify(newConfig));
+            
+            // Update config
+            CONFIG = newConfig;
+            
+            // Reset and restart the locker
+            resetLocker();
+            
+            // Close config panel
+            configSection.classList.remove('show');
+            
+            // Show success message
+            alert('Configuration saved successfully! The page will reload with new settings.');
+        }
+        
+        // Reset locker with new configuration
+        function resetLocker() {
+            // Clear intervals
+            clearInterval(timerInterval);
+            
+            // Reset state
+            currentAd = 1;
+            timeLeft = CONFIG.timePerAd;
+            adsCompleted = 0;
+            isTransitioning = false;
+            
+            // Reset UI
+            unlockButtonHeader.disabled = true;
+            unlockButtonHeader.innerHTML = '<i class="fas fa-lock"></i> GO TO VIDEO';
+            unlockButtonHeader.classList.remove('unlocked');
+            
+            // Apply configuration
+            applyConfiguration();
+            
+            // Restart
+            initContentLocker();
+        }
+        
+        // Event listeners
+        unlockButtonHeader.addEventListener('click', redirectToVideoUrl);
+        configToggle.addEventListener('click', toggleConfigPanel);
+        saveConfigBtn.addEventListener('click', saveConfiguration);
+        closeConfigBtn.addEventListener('click', () => {
+            configSection.classList.remove('show');
+        });
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initContentLocker);
+        
+        // Add a visual effect when page loads
+        window.onload = function() {
+            setTimeout(() => {
+                document.querySelector('.header').style.transform = 'translateY(0)';
+                document.querySelector('.header').style.opacity = '1';
+            }, 100);
+        };
+        
+        // Initial styles for header animation
+        document.querySelector('.header').style.transform = 'translateY(-20px)';
+        document.querySelector('.header').style.opacity = '0.8';
+        document.querySelector('.header').style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+    </script>
+</body>
+</html>
